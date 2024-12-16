@@ -1,0 +1,176 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Periksa Khodam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .loading-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .loading-animation div {
+            width: 15px;
+            height: 15px;
+            background-color: #3498db;
+            border-radius: 50%;
+            animation: bounce 1.5s infinite ease-in-out;
+        }
+        .loading-animation div:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        .loading-animation div:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">Periksa Khodam</h1>
+        <form id="khodamForm" class="flex flex-col items-center">
+            <input type="text" id="nameInput" class="border border-gray-300 p-2 rounded mb-4 w-full" placeholder="Masukkan nama Anda" required>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Cek Khodam</button>
+        </form>
+        <div id="loading" class="hidden flex flex-col items-center mt-4">
+            <div class="loading-animation">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <p class="mt-2">Memeriksa khodam...</p>
+        </div>
+        <div id="result" class="hidden mt-4 text-center">
+            <h2 class="text-xl font-bold mb-2">Khodam <span id="userName"></span> hari ini adalah:</h2>
+            <div class="flex items-center justify-center mb-4">
+                <span id="leftEmoji" class="text-2xl"></span>
+                <p id="khodamName" class="text-lg mx-2"></p>
+                <span id="rightEmoji" class="text-2xl"></span>
+            </div>
+            <p id="quote" class="italic text-gray-600 mb-4"></p>
+            <button id="resetButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Coba Nama Lain</button>
+        </div>
+        <footer class="mt-8 text-center text-gray-500">
+            &copy; RPL SMK Bhakti Insani 2024
+        </footer>
+    </div>
+
+    <script>
+        const quotes = [
+            "Hidup itu seperti roda, kadang di atas kadang di bawah.",
+            "Jangan lupa bahagia, karena bahagia itu sederhana.",
+            "Ketika satu pintu kebahagiaan tertutup, pintu lain terbuka.",
+            "Hidup adalah petualangan yang berani atau tidak sama sekali.",
+            "Jangan menyerah, keajaiban terjadi setiap hari.",
+            "Tersenyumlah, karena senyum adalah ibadah.",
+            "Hidup itu singkat, nikmati setiap momennya.",
+            "Jangan takut gagal, karena kegagalan adalah awal dari kesuksesan.",
+            "Bersyukurlah atas apa yang kamu miliki, karena itu adalah anugerah.",
+            "Hidup adalah tentang membuat pilihan, pilihlah yang terbaik.",
+            "Jangan biarkan kegagalan menghentikanmu, biarkan itu menjadi pelajaran.",
+            "Kebahagiaan tidak datang dari apa yang kita miliki, tetapi dari apa yang kita nikmati.",
+            "Hidup adalah seni menggambar tanpa penghapus.",
+            "Jangan pernah menyerah pada mimpi-mimpimu.",
+            "Kegagalan adalah kesempatan untuk memulai lagi dengan lebih cerdas.",
+            "Hidup adalah perjalanan, bukan tujuan.",
+            "Jangan takut untuk mencoba hal baru.",
+            "Kebahagiaan adalah pilihan, bukan hasil.",
+            "Hidup adalah tentang menciptakan diri sendiri.",
+            "Jangan biarkan masa lalu mengendalikan masa depanmu.",
+            "Hidup adalah tentang membuat kenangan, bukan hanya uang.",
+            "Jangan biarkan ketakutan menghentikanmu dari mencapai impianmu.",
+            "Hidup adalah tentang menemukan dirimu sendiri.",
+            "Jangan biarkan orang lain menentukan kebahagiaanmu.",
+            "Hidup adalah tentang mencintai dan dicintai.",
+            "Jangan biarkan kegagalan menghentikanmu dari mencoba lagi.",
+            "Hidup adalah tentang menjadi yang terbaik dari dirimu sendiri.",
+            "Jangan biarkan masa lalu menghantui masa depanmu.",
+            "Hidup adalah tentang menemukan kebahagiaan dalam hal-hal kecil.",
+            "Jangan biarkan ketakutan menghentikanmu dari mencapai potensimu."
+        ];
+
+        const words = [
+            "Kucing", "Bebek", "Sapi", "Ayam", "Kambing", "Gajah", "Harimau", "Kuda", "Ikan", "Burung",
+            "Kelinci", "Ular", "Kura-kura", "Kupu-kupu", "Laba-laba", "Semut", "Lebah", "Kecoa", "Nyamuk", "Lalat",
+            "Kucing", "Bebek", "Sapi", "Ayam", "Kambing", "Gajah", "Harimau", "Kuda", "Ikan", "Burung",
+            "Kelinci", "Ular", "Kura-kura", "Kupu-kupu", "Laba-laba", "Semut", "Lebah", "Kecoa", "Nyamuk", "Lalat",
+            "Kucing", "Bebek", "Sapi", "Ayam", "Kambing", "Gajah", "Harimau", "Kuda", "Ikan", "Burung"
+        ];
+
+        const adjectives = [
+            "Lucu", "Gila", "Kocak", "Aneh", "Ganteng", "Cantik", "Imut", "Gembul", "Gendut", "Kurang Ajar",
+            "Jahat", "Baik", "Pintar", "Bodoh", "Keren", "Kuat", "Lemah", "Cepat", "Lambat", "Licik",
+            "Lucu", "Gila", "Kocak", "Aneh", "Ganteng", "Cantik", "Imut", "Gembul", "Gendut", "Kurang Ajar",
+            "Jahat", "Baik", "Pintar", "Bodoh", "Keren", "Kuat", "Lemah", "Cepat", "Lambat", "Licik",
+            "Lucu", "Gila", "Kocak", "Aneh", "Ganteng", "Cantik", "Imut", "Gembul", "Gendut", "Kurang Ajar"
+        ];
+
+        const emojis = [
+            "😺", "🦆", "🐄", "🐔", "🐐", "🐘", "🐅", "🐎", "🐟", "🐦",
+            "🐰", "🐍", "🐢", "🦋", "🕷️", "🐜", "🐝", "🪳", "🦟", "🪰",
+            "😺", "🦆", "🐄", "🐔", "🐐", "🐘", "🐅", "🐎", "🐟", "🐦",
+            "🐰", "🐍", "🐢", "🦋", "🕷️", "🐜", "🐝", "🪳", "🦟", "🪰",
+            "😺", "🦆", "🐄", "🐔", "🐐", "🐘", "🐅", "🐎", "🐟", "🐦"
+        ];
+
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function getRandomKhodam() {
+            const word = getRandomElement(words);
+            const adjective = getRandomElement(adjectives);
+            return `${word} ${adjective}`;
+        }
+
+        function getRandomEmoji() {
+            return getRandomElement(emojis);
+        }
+
+        document.getElementById('khodamForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('nameInput').value;
+            if (name.trim() === "") return;
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
+
+            setTimeout(() => {
+                const randomKhodam = getRandomKhodam();
+                const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                const leftEmoji = getRandomEmoji();
+                const rightEmoji = getRandomEmoji();
+
+                document.getElementById('userName').textContent = name;
+                document.getElementById('khodamName').textContent = randomKhodam;
+                document.getElementById('leftEmoji').textContent = leftEmoji;
+                document.getElementById('rightEmoji').textContent = rightEmoji;
+                document.getElementById('quote').textContent = randomQuote;
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('result').classList.remove('hidden');
+            }, 3000);
+        });
+
+        document.getElementById('resetButton').addEventListener('click', function() {
+            document.getElementById('nameInput').value = '';
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('khodamForm').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
